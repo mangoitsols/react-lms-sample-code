@@ -1,5 +1,5 @@
 // React Import
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 
 // MUI Import
 import {
@@ -18,6 +18,7 @@ import {
 // Helper Import
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { LoadingButton } from "@mui/lab";
 
 // External Components
 import Navbar from "@/common/LayoutNavigations/navbar";
@@ -29,22 +30,26 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
-import { SearchOutlined } from "@mui/icons-material";
 import { useRouter } from "next/router";
-import { HandleSubscriptionGetByID } from "@/services/subscription";
+import {
+  HandleSubscriptionGetByID,
+  HandleSubscriptionUpdate,
+} from "@/services/subscription";
 import { HandleOrderGetByUserID } from "@/services/order";
 import { capitalizeFirstLetter } from "@/common/CapitalFirstLetter/capitalizeFirstLetter";
 import { usePagination } from "@/common/Pagination/paginations";
 import moment from "moment";
-import Footer from "@/common/LayoutNavigations/footer";
 import BreadcrumbsHeading from "@/common/BreadCrumbs/breadcrumbs";
+import ArrowBackOutlinedIcon from "@mui/icons-material/ArrowBackOutlined";
 
 // CSS Import
 import profiles from "../../../../styles/profile.module.css";
 import styles from "../../../../styles/sidebar.module.css";
 import subs from "../../../../styles/subsciption.module.css";
+import Link from "next/link";
+import CircularProgressBar from "@/common/CircularProcess/circularProgressBar";
+import { AlertSubscriptionDialog } from "@/common/SubscriptionStatus/subscriptionManage";
 
 interface Column {
   id: "id" | "amount" | "date" | "transaction_id" | "payment_method";
@@ -63,13 +68,17 @@ const columns: Column[] = [
 ];
 
 export default function View() {
-  var getId: any;
-  const [rows, setRows] = React.useState<any>([]);
-  const [subsData, setSubsdata] = React.useState<any>([]);
+  const [rows, setRows] = useState<any>([]);
+  const [subsData, setSubsdata] = useState<any>([]);
   const [toggle, setToggle] = useState<boolean>(false);
+  const [isLoadingButton, setLoadingButton] = useState<boolean>(false);
+  const [open, setOpen] = useState(false);
+  const [subsId, setSubId] = useState<any>();
 
   useEffect(() => {
     let localData: any;
+    var getId: any;
+
     if (typeof window !== "undefined") {
       localData = window.localStorage.getItem("userData");
     }
@@ -111,6 +120,30 @@ export default function View() {
     });
   };
 
+  const cancelSubscription = (id: any) => {
+    setOpen(!open);
+    setSubId(id);
+  };
+
+  const handleSubsUpdate = async () => {
+    let reqData = {
+      status: "canceled",
+    };
+    setOpen(false);
+    setLoadingButton(true);
+    await HandleSubscriptionUpdate(subsId, reqData)
+      .then((res) => {
+        setTimeout(() => {
+          setToggle(!toggle);
+          router.push("/user/subscription");
+          setLoadingButton(false);
+        }, 2000);
+      })
+      .catch((err) => {
+        console.log(err);
+        setLoadingButton(false);
+      });
+  };
   return (
     <>
       <Navbar />
@@ -119,13 +152,30 @@ export default function View() {
 
         <Box className={styles.siteBodyContainer}>
           {/* breadcumbs */}
-          <BreadcrumbsHeading
-            First="Home"
-            Middle="Subscription"
-            Text="VIEW"
-            Link="/subscription"
-          />
-
+          <Box className={subs.maindisplay}>
+            <BreadcrumbsHeading
+              First="Home"
+              Middle="Subscription"
+              Text="VIEW"
+              Link="/user/subscription"
+            />
+            <Box className={courseStyle.backbtn}>
+              <Link
+                href="/user/subscription"
+                style={{ textDecoration: "none" }}
+              >
+                <Button
+                  type="submit"
+                  size="large"
+                  variant="contained"
+                  className={courseStyle.backbtncs}
+                >
+                  <ArrowBackOutlinedIcon />
+                  &nbsp;Back
+                </Button>
+              </Link>
+            </Box>
+          </Box>
           {/* main content */}
           <Card>
             <CardContent>
@@ -145,7 +195,7 @@ export default function View() {
                   </Typography>
                   &emsp;
                   <Typography variant="subtitle2" className={subs.fontCSS}>
-                  {capitalizeFirstLetter(subsData && subsData?.name)}
+                    {capitalizeFirstLetter(subsData && subsData?.name)}
                   </Typography>
                 </Box>
                 <Box className={subs.maindisplay}>
@@ -176,9 +226,50 @@ export default function View() {
                   </Typography>
                 </Box>
                 <br />
-                <Box className={subs.btncss}>
-                  <Button variant="contained">Cancel Subscription</Button>
-                </Box>
+                {subsData.status === "canceled" ? (
+                  // <Link href="www.google.com">
+                  <Fragment>
+                    <Box className={subs.maindisplay1}>
+                      <Typography
+                        variant="subtitle1"
+                        className={subs.useSubsCancell}
+                      >
+                        If you want to activate this subscription
+                      </Typography>
+                      &nbsp;
+                      <Link href="/user/subscription">
+                        <Typography
+                          variant="subtitle1"
+                          className={subs.useSubsMessage}
+                        >
+                          Click here
+                        </Typography>
+                      </Link>
+                    </Box>
+                  </Fragment>
+                ) : (
+                  // </Link>
+                  <Box className={subs.btncss1}>
+                    {!isLoadingButton ? (
+                      <Button
+                        variant="contained"
+                        onClick={() => cancelSubscription(subsData?.id)}
+                      >
+                        Cancel Subscription
+                      </Button>
+                    ) : (
+                      <LoadingButton
+                        loading={isLoadingButton}
+                        size="large"
+                        className={subs.subsbtn}
+                        variant="contained"
+                        disabled
+                      >
+                        <CircularProgressBar />
+                      </LoadingButton>
+                    )}
+                  </Box>
+                )}
               </Box>
             </CardContent>
           </Card>
@@ -282,6 +373,13 @@ export default function View() {
                     </Stack>
                   </TableContainer>
                 </Paper>
+                <AlertSubscriptionDialog
+                  open={open}
+                  onClose={cancelSubscription}
+                  onSubmit={handleSubsUpdate}
+                  title={"Cancel Subscription"}
+                  whatYouDelete="Cancel Subscription"
+                />
               </Box>
             </CardContent>
           </Card>

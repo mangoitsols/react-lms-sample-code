@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from "next/router";
 // MUI Import
-// import { Attachment, Description, Image, Movie, PictureAsPdf } from '@material-ui/icons';
 import { Box, Button, Card, CardContent, FormControl, Grid, IconButton, InputLabel, MenuItem, NativeSelect, Select, TextField, Typography } from "@mui/material";
 // External Components
 import SideBar from "@/common/LayoutNavigations/sideBar";

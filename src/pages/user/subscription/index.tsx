@@ -7,12 +7,16 @@ import {
   Card,
   CardContent,
   FormControl,
+  IconButton,
   MenuItem,
   Pagination,
   Select,
   Stack,
+  TextField,
   Typography,
 } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
+
 // CSS Import
 import styles from "../../../styles/sidebar.module.css";
 import courseStyle from "../../../styles/course.module.css";
@@ -28,10 +32,14 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import { useRouter } from "next/router";
-import { HandleSubscriptionGetByUserID } from "@/services/subscription";
+import {
+  HandleSubscriptionGetByUserID,
+  HandleSearchSubsGet,
+} from "@/services/subscription";
 import { capitalizeFirstLetter } from "@/common/CapitalFirstLetter/capitalizeFirstLetter";
 import { usePagination } from "@/common/Pagination/paginations";
 import { handleSortData } from "@/common/Sorting/sorting";
+import { SearchOutlined } from "@mui/icons-material";
 
 interface Column {
   id: "id" | "name" | "amount" | "next_pay" | "status" | "action";
@@ -51,9 +59,10 @@ const columns: Column[] = [
 ];
 
 const Subscription = () => {
-  var getId: any;
   const [rows, setRows] = React.useState<any>([]);
   const [toggle, setToggle] = React.useState<boolean>(false);
+  const [search, setSearch] = React.useState("");
+  const [userId, setUserId] = React.useState<any>("");
 
   const router = useRouter();
   //pagination
@@ -76,12 +85,15 @@ const Subscription = () => {
 
   React.useEffect(() => {
     let localData: any;
+    let getId: any;
+
     if (typeof window !== "undefined") {
       localData = window.localStorage.getItem("userData");
     }
     if (localData) {
       getId = JSON.parse(localData);
     }
+    setUserId(getId);
     getAllCourseData(getId);
   }, []);
 
@@ -90,22 +102,29 @@ const Subscription = () => {
     setRows(sortData);
     setToggle(!toggle);
   };
-  //   const handleSearch = (e: any, identifier: any) => {
-  //     setPage(1);
-  //     DATA.jump(1);
-  //     if (identifier === "reset") {
-  //       HandleCourseGet("", { type: 0, status: 0 }).then((itemSeached) => {
-  //         setRows(itemSeached.data);
-  //       });
-  //       setSearch(e);
-  //     } else {
-  //       const search = e.target.value;
-  //       setSearch(e.target.value);
-  //       HandleCourseGet(search, filterObject).then((itemSeached) => {
-  //         setRows(itemSeached.data);
-  //       });
-  //     }
-  //   };
+  const handleSearch = (e: any, identifier: any) => {
+    setPage(1);
+    DATA.jump(1);
+    if (identifier === "reset") {
+      HandleSubscriptionGetByUserID(userId?.id).then((subs) => {
+        setRows(subs.data);
+      });
+      setSearch(e);
+    } else {
+      const search = e.target.value;
+      if (search === "") {
+        setSearch("");
+        HandleSubscriptionGetByUserID(userId?.id).then((subs) => {
+          setRows(subs.data);
+        });
+      } else {
+        setSearch(e.target.value);
+        HandleSearchSubsGet(search, userId?.id).then((itemSeached) => {
+          setRows(itemSeached.data);
+        });
+      }
+    }
+  };
 
   const getAllCourseData = (data: any) => {
     HandleSubscriptionGetByUserID(data?.id).then((subs) => {
@@ -131,154 +150,25 @@ const Subscription = () => {
           {/* main content */}
           <Card>
             <CardContent>
-              {/* <TextField
+              <TextField
                 id="standard-search"
                 value={search}
                 variant="outlined"
                 placeholder="Search by course"
-                onChange={(e) => handleSearch(e, '')}
+                onChange={(e: any) => handleSearch(e, "")}
                 InputProps={{
-                  endAdornment: (
-                    !search ? <IconButton>
+                  endAdornment: !search ? (
+                    <IconButton>
                       <SearchOutlined />
-                    </IconButton> : <IconButton onClick={(e) => handleSearch('', 'reset')}> <CloseIcon /></IconButton>
+                    </IconButton>
+                  ) : (
+                    <IconButton onClick={(e) => handleSearch("", "reset")}>
+                      {" "}
+                      <CloseIcon />
+                    </IconButton>
                   ),
                 }}
-              /> */}
-              {/* <Box
-                sx={{ float: "right", display: "flex", alignItems: "center" }}
-              >
-                <PopupState variant="popover" popupId="demo-popup-popover" >
-                  {(popupState) => (
-                    <Box>
-                      <Button
-                        sx={{ display: "inline-flex", color: "#1976d2" }}
-                        {...bindTrigger(popupState)}
-                      >
-                        <FilterAltOutlinedIcon />
-                        Filter
-                      </Button>
-                      <Popover
-                        {...bindPopover(popupState)}
-                        style={{ width: '35% !important' }}
-                        anchorOrigin={{
-                          vertical: "bottom",
-                          horizontal: "left",
-                        }}
-                        transformOrigin={{
-                          vertical: "top",
-                          horizontal: "center",
-                        }}
-                      >
-                        <Box>
-                          <Container
-                            className="filter-box"
-                            style={{ padding: "15px" }}
-                          >
-                            <Grid>
-                              <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                                Filter
-                              </Typography>
-                              <Box component="form"
-                                noValidate
-                                onSubmit={handleSubmit(onSubmit)}
-                                sx={{ mt: 1 }}>
-                                <Stack
-                                  style={{ marginTop: "10px" }}
-                                  className="form-filter"
-                                >
-                                  <Grid container spacing={2}>
-                                    <Grid item xs={12} md={6} lg={6} >
-                                    <Stack spacing={2}>
-                                        <InputLabel htmlFor="enddate" sx={{ fontWeight: 'bold' }}>
-                                          Type
-                                        </InputLabel>
-                                        <Controller
-                                          name="type"
-                                          control={control}
-                                          defaultValue={getFilter}
-                                          render={({ field }) => (
-                                            <FormControl fullWidth>
-                                              <Select {...field} displayEmpty>
-                                                <MenuItem value={0}>All</MenuItem>
-                                                <MenuItem value={'free'}>
-                                                  Free
-                                                </MenuItem>
-                                                <MenuItem value={'paid'}>
-                                                  Paid
-                                                </MenuItem>
-                                              </Select>
-                                            </FormControl>
-                                          )}
-                                        />
-                                      </Stack>
-                                    </Grid>
-                                    <Grid item xs={12} md={6} lg={6}>
-                                      <Stack spacing={2}>
-                                        <InputLabel htmlFor="enddate" sx={{ fontWeight: 'bold' }}>
-                                          Status
-                                        </InputLabel>
-                                        <Controller
-                                          name="status"
-                                          control={control}
-                                          defaultValue={getFilter}
-                                          render={({ field }) => (
-                                            <FormControl fullWidth>
-                                              <Select {...field} displayEmpty>
-                                                <MenuItem value={0}>All</MenuItem>
-                                                <MenuItem value={'active'}>
-                                                  Active
-                                                </MenuItem>
-                                                <MenuItem value={'inactive'}>
-                                                  In-active
-                                                </MenuItem>
-                                              </Select>
-                                            </FormControl>
-                                          )}
-                                        />
-                                      </Stack>
-                                    </Grid>
-
-                                    <Grid
-                                      item
-                                      xs={12}
-                                      lg={12}
-                                    >
-                                  <Box >
-                                        <Button
-                                          size="medium"
-                                          variant="contained"
-                                          color="primary"
-                                          type="button"
-                                          onClick={resetFilterValue}
-                                        >
-                                          Reset
-                                        </Button>
-                                        <Button
-                                          size="medium"
-                                          type="submit"
-                                          variant="contained"
-                                          color="primary"
-                                        
-                                          onClick={popupState.close}
-                                        >
-                                          Apply
-                                        </Button>
-                                      </Box>
-                                    </Grid>
-                                  </Grid>
-                                </Stack>
-                              </Box>
-                            </Grid>
-                          </Container>
-                        </Box>
-                      </Popover>
-                    </Box>
-                  )}
-                </PopupState>
-                &nbsp;
-                <Button variant="contained" onClick={() => router.push('/admin/courses/allcourses/addcourse')}>Add New Course</Button>
-              </Box> */}
+              />
               <Paper>
                 <TableContainer className={courseStyle.tableContainer}>
                   <Table stickyHeader aria-label="sticky table">
@@ -319,9 +209,9 @@ const Subscription = () => {
                         DATA.currentData().map((row: any) => {
                           let color = row?.status;
                           const statusColor =
-                            color === row?.status
+                            color === "active"
                               ? courseStyle.activeClassColor
-                              : color === "inactive"
+                              : color === "canceled"
                               ? courseStyle.inactiveClassColor
                               : courseStyle.draftClassColor;
                           return (
@@ -337,9 +227,7 @@ const Subscription = () => {
                               </TableCell>
                               <TableCell>${row?.price}</TableCell>
                               <TableCell>
-                                {/* {capitalizeFirstLetter(
-                                  row?.course?.is_chargeable
-                                )} */}
+                             
                                 25 May 2023
                               </TableCell>
                               <TableCell className={statusColor}>
@@ -402,18 +290,10 @@ const Subscription = () => {
                   </Stack>
                 </TableContainer>
               </Paper>
-              {/* <AlertDialog
-                open={open}
-                onClose={handleClickOpen}
-                onSubmit={handleDeletesRow}
-                title={deleteRow.title}
-                whatYouDelete="Session"
-              /> */}
             </CardContent>
           </Card>
         </Box>
       </Box>
-      {/* <Footer/> */}
     </>
   );
 };

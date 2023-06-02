@@ -24,15 +24,6 @@ interface appbar{
   portalData ?: any;
 }
 
-function stringAvatar(first_name: string,last_name: string){
-  return {
-    sx: {
-      bgcolor: '#e8661b',
-    },
-    children: `${capitalizeFirstLetter(first_name?.split(' ')[0][0])}${capitalizeFirstLetter(last_name?.split(' ')[0][0])}`,
-  };
-}
-
 export default function Navbar({portalData}:appbar) {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
@@ -170,7 +161,7 @@ export default function Navbar({portalData}:appbar) {
           {capitalizeFirstLetter(userData?.last_name)}
         </Typography>
       </MenuItem>
-      {/* <MenuItem>
+      <MenuItem>
         <IconButton
           size="large"
           aria-label="show 17 new notifications"
@@ -181,7 +172,7 @@ export default function Navbar({portalData}:appbar) {
           </Badge>
         </IconButton>
         <Typography>Notifications</Typography>
-      </MenuItem> */}
+      </MenuItem>
       <MenuItem onClick={() => router.push("/profile")}>
         <IconButton
           size="large"
@@ -216,7 +207,7 @@ export default function Navbar({portalData}:appbar) {
            <Box component='img' src={portalData?BASE_URL+"/"+portalData?.org_logo:'/Images/company_logo.png'} width={'180px'} height={'50px'}  sx={{ display: { xs: 'block', sm: 'block' } }} alt="Company logo"/>
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
-            {/* <IconButton
+            <IconButton
               size="large"
               aria-label="show 17 new notifications"
               color="inherit"
@@ -224,12 +215,11 @@ export default function Navbar({portalData}:appbar) {
               <Badge badgeContent={17} color="error">
                 <NotificationsNoneOutlinedIcon />
               </Badge>
-            </IconButton> */}
+            </IconButton>
             <Box className={styles.createVrLine}></Box>
 
             <Avatar
               src="/"
-              {...stringAvatar(userData?.first_name,userData?.last_name)}
               alt={userData && userData?.first_name}
               className={styles.windowFullWidthAvatar}
             />

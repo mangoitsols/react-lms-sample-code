@@ -1,14 +1,5 @@
-//SERVER API URL
-export const BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}`;
-
-// FRONTEND SERVER URL
-export const FRONTEND_BASE_URL = `${process.env.NEXT_PUBLIC_FRONTEND_BASE_URL}`;
-
-// //FRONTEND LOCAL URL
-// export const FRONTEND_BASE_URL = `${process.env.NEXT_PUBLIC_LOCAL_FRONTEND_BASE_URL}`;
-
-// // LOCAL API URL
-// export const BASE_URL = `${process.env.NEXT_PUBLIC_LOCAL_BASE_URL}`;
+//Domain URL
+export const BASE_URL = "http://localhost:6030";
 
 export const API = {
   authToken: `${BASE_URL}/${process.env.NEXT_PUBLIC_AUTH_TOKEN}`,
@@ -21,6 +12,7 @@ export const API = {
   userUpdateById: `${BASE_URL}/${process.env.NEXT_PUBLIC_UPDATE_USER_BY_ID}`,
 
   getCourses: `${BASE_URL}/${process.env.NEXT_PUBLIC_GET_COURSES}`,
+  getCoursesByCouseId: `${BASE_URL}/${process.env.NEXT_PUBLIC_GET_COURSES_BY_COURSE_ID}`,
   createCourse: `${BASE_URL}/${process.env.NEXT_PUBLIC_CREATE_COURSE}`,
   updateCourse: `${BASE_URL}/${process.env.NEXT_PUBLIC_UPDATE_COURSE}`,
   deleteCourse: `${BASE_URL}/${process.env.NEXT_PUBLIC_DELETE_COURSE}`,
@@ -41,15 +33,10 @@ export const API = {
 
   getSubscription: `${BASE_URL}/${process.env.NEXT_PUBLIC_GET_SUBSCRIPTION}`,
   getSubsById: `${BASE_URL}/${process.env.NEXT_PUBLIC_GET_SUBSCRIPTION_BY_ID}`,
+  updateSubscription: `${BASE_URL}/${process.env.NEXT_PUBLIC_UPDATE_SUBSCRIPTION}`,
 
-  getEmailContent: `${BASE_URL}/${process.env.NEXT_PUBLIC_EMAIL_CONTENT_GET}`,
-  createEmailContent: `${BASE_URL}/${process.env.NEXT_PUBLIC_EMAIL_CONTENT_CREATE}`,
-  updateEmailContent: `${BASE_URL}/${process.env.NEXT_PUBLIC_EMAIL_CONTENT_UPDATE}`,
+  downloadPDF: `${BASE_URL}/${process.env.NEXT_PUBLIC_DOWNLOAD_RECEIPT}`,
 
-  getEmailType: `${BASE_URL}/${process.env.NEXT_PUBLIC_EMAIL_TYPE_GET}`,
-  createEmailType: `${BASE_URL}/${process.env.NEXT_PUBLIC_EMAIL_TYPE_CREATE}`,
-  updateEmailType: `${BASE_URL}/${process.env.NEXT_PUBLIC_EMAIL_TYPE_UPDATE}`,
-  
   getOrder: `${BASE_URL}/${process.env.NEXT_PUBLIC_GET_ORDER_BY_USER_ID}`,
 
   //accept payment
